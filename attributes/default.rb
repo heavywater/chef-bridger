@@ -1,4 +1,3 @@
-default[:bridger] = {}
 default[:bridger][:interface] = 'eth0'
 default[:bridger][:name] = 'br0'
 default[:bridger][:dhcp] = true

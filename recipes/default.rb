@@ -1,6 +1,6 @@
 package 'bridge-utils'
 
-[[node[:bridger]] + node[:bridger][:additionals]].each do |bridge|
+([node[:bridger]] + node[:bridger][:additionals]).each do |bridge|
   # Lets build a bridge!
   # TODO: flush here?
   execute "bridger[kill the interface (#{bridge[:interface]})]" do
@@ -13,26 +13,26 @@ package 'bridge-utils'
   execute "bridger[create the bridge (#{bridge[:name]})]" do
     command "brctl addbr #{bridge[:name]}"
     action :nothing
-    subscribes :run, resources(:execute => 'bridger[kill the network]'), :immediately
+    subscribes :run, resources(:execute => "bridger[kill the interface (#{bridge[:interface]})]"), :immediately
   end
 
   execute "bridger[bind the bridge (#{bridge[:name]} -> #{bridge[:interface]})]" do
     command "brctl addif #{bridge[:name]} #{bridge[:interface]}"
     action :nothing
-    subscribes :run, resources(:execute => 'bridger[kill the network]'), :immediately
+    subscribes :run, resources(:execute => "bridger[kill the interface (#{bridge[:interface]})]"), :immediately
   end
 
   if(bridge[:dhcp])
     execute "bridger[configure the bridge (#{bridge[:name]} - dynamic)]" do
       command "dhclient #{bridge[:name]}"
       action :nothing
-      subscribes :run, resources(:execute => 'bridger[kill the network]'), :immediately
+      subscribes :run, resources(:execute => "bridger[kill the interface (#{bridge[:interface]})]"), :immediately
     end
   else
     execute "bridger[configure the bridge (#{bridge[:name]} - static)]" do
       command "ifconfig #{bridge[:name]} #{bridge[:address]} netmask #{bridge[:netmask]}"
       action :nothing
-      subscribes :run, resources(:execute => 'bridger[kill the network]'), :immediately
+      subscribes :run, resources(:execute => "bridger[kill the interface (#{bridge[:interface]})]"), :immediately
     end
   end
   # YAY we built a bridge!
