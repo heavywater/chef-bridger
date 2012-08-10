@@ -1,6 +1,13 @@
 package 'bridge-utils'
 
 ([node[:bridger]] + node[:bridger][:additionals]).each do |bridge|
+  # sanity checks
+  if(bridge[:address] && bridge[:dhcp])
+    raise "Bridge can only specify one of :address or :dhcp"
+  elsif(bridge[:address].nil? && bridge[:dhcp].nil?)
+    raise "Bridge must specify one of :address or :dhcp"
+  end
+
   # Lets build a bridge!
   # TODO: flush here?
   execute "bridger[kill the interface (#{bridge[:interface]})]" do
